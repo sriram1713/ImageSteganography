@@ -1,0 +1,81 @@
+<!-- index1.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steganography Web App</title>
+</head>
+
+<body>
+    <h1>Steganography Web App</h1>
+
+    <h2>Encode Message</h2>
+    <form id="encodeForm">
+        <label for="data">Enter Message:</label>
+        <textarea id="data" name="data" rows="4" cols="50"></textarea><br>
+        <label for="image">Select Image:</label>
+        <input type="file" id="image" name="image"><br>
+        <button type="button" onclick="encodeMessage()">Encode</button>
+    </form>
+
+    <h2>Decode Message</h2>
+    <form id="decodeForm">
+        <label for="imageToDecode">Select Image with Hidden Text:</label>
+        <input type="file" id="imageToDecode" name="imageToDecode"><br>
+        <button type="button" onclick="decodeMessage()">Decode</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        async function encodeMessage() {
+            const formData = new FormData(document.getElementById('encodeForm'));
+
+            try {
+                const response = await fetch('/encode', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('result').innerText = result.message;
+                    const encodedImage = document.createElement('img');
+                    encodedImage.src = `data:image/png;base64,${result.encoded_image}`;
+                    document.getElementById('result').appendChild(encodedImage);
+                } else {
+                    document.getElementById('result').innerText = `Error: ${result.message}`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function decodeMessage() {
+            const formData = new FormData(document.getElementById('decodeForm'));
+
+            try {
+                const response = await fetch('/decode', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('result').innerText = `Decoded Message: ${result.hidden_data}`;
+                } else {
+                    document.getElementById('result').innerText = `Error: ${result.message}`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+
+</html>
